@@ -9,15 +9,16 @@ import dayjs from 'dayjs';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 
-import { getBannerListApi , deleteBannerDeleteApi , putBannerStatusApi } from '#/api/index';
+import { getStationListApi , deleteStationDeleteApi ,putStationStatusApi } from '#/api/index';
 
 import CreateDemo from './create-demo.vue';
 type RowType = {
-  bannerId: string;
-  title: string;
-  imageUrl: string; 
-  linkType: number; 
-  linkUrl: string;  
+  stationId: Number;
+  stationName: string;
+  city: string; 
+  address: number; 
+  lng: number;  
+  lat: number;
   sort: number;
   status: number;
   remark: string;
@@ -31,14 +32,8 @@ const formOptions: VbenFormProps = {
     {
       component: 'Input',
       defaultValue: '',
-      fieldName: 'title',
-      label: '标题',
-    },
-    {
-      component: 'Input',
-      defaultValue: '',
-      fieldName: 'linkUrl',
-      label: '链接',
+      fieldName: 'stationName',
+      label: '车站名称',
     },
     {
       component: 'Select',
@@ -75,9 +70,9 @@ const gridOptions: VxeTableGridOptions<RowType> = {
   },
   columns: [
     { field: 'sort', title: '序号', width: 100 },
-    { field: 'title', title: '标题',  width: 150 },
-    { field: 'imageUrl', title: '轮播图' ,slots: { default: 'image-url' },width: 200,cellRender: { name: 'CellImage' },},
-    { field: 'linkType', title: '跳转链接',slots: { default: 'link-type' } },
+    { field: 'stationName', title: '车站名称',  width: 150 },
+    { field: 'city', title: '所属城市' , width:200},
+    { field: 'address', title: '详细地址', width:240 },
     { field: 'status', title: '状态',slots: { default: 'status' } },
     { field: 'createTime', title: '创建时间',width: 150 },
     { field: 'updateTime', title: '修改时间' ,width: 150 },
@@ -100,7 +95,7 @@ const gridOptions: VxeTableGridOptions<RowType> = {
   proxyConfig: {
     ajax: {
       query: async ({ page }, formValues:any) => {
-        const res = await getBannerListApi({
+        const res = await getStationListApi({
           pageNum: page.currentPage,
           pageSize: page.pageSize,
           ...formValues,
@@ -114,14 +109,14 @@ const gridOptions: VxeTableGridOptions<RowType> = {
     },
   },
   showOverflow: false,
-  toolbarConfig: {
-    custom: true,
-    export: true,
-    refresh: true,
-    resizable: true,
-    search: true,
-    zoom: true,
-  },
+  // toolbarConfig: {
+  //   custom: true,
+  //   export: true,
+  //   refresh: true,
+  //   resizable: true,
+  //   search: true,
+  //   zoom: true,
+  // },
 };
 
 const [Grid,{reload }] = useVbenVxeGrid<RowType>({
@@ -163,24 +158,28 @@ const handleDeleteBanner = async (row:any) => {
     okText:"确定",
     cancelText:"取消",
     async onOk() {
-      const res = await deleteBannerDeleteApi(row.bannerId);
+      const res = await deleteStationDeleteApi(row.stationId);
       if(res.code == 200){
         message.success(res.message);
         handleTriggerSearch();
+      }else{
+        message.error(res.message);
       }
     },
   });
 };
 // 修改状态
 const handleChangeStatus = async (row:any) => {
-  console.log(row.status,row.bannerId)
-  const res = await putBannerStatusApi({
-    bannerId: row.bannerId,
+  const res = await putStationStatusApi({
+    stationId: row.stationId,
     status: row.status,
   });
   if(res.code == 200){
     message.success(res.message);
     handleTriggerSearch();
+  }else{
+    message.error(res.message);
+
   }
 };
 </script>
@@ -189,16 +188,7 @@ const handleChangeStatus = async (row:any) => {
   <Page auto-content-height>
     <Grid>
       <template #toolbar-tools>
-        <Button type="primary" @click="handleCreateBanner">新建轮播图</Button>
-      </template>
-      <template #image-url="{ row }">
-        <a-image :src="row?.imageUrl" :height="100" />
-      </template>
-      <template #link-type="{ row }">
-        <div class="link-type-box">
-          <span v-if="row?.linkType == 0">不跳转</span>
-          <span v-if="row?.linkType != 0">{{row?.linkUrl}}</span>
-        </div>
+        <Button type="primary" @click="handleCreateBanner">新建站点</Button>
       </template>
       <template #status="{ row }">
         <!-- eslint-disable-next-line vue/no-v-model-argument -->

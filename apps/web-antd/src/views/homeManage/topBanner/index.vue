@@ -9,11 +9,11 @@ import dayjs from 'dayjs';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 
-import { getBannerListApi , deleteBannerDeleteApi , putBannerStatusApi } from '#/api/index';
+import { getTopBannerListApi , deleteTopBannerDeleteApi , putTopBannerStatusApi } from '#/api/index';
 
 import CreateDemo from './create-demo.vue';
 type RowType = {
-  bannerId: string;
+  TopBannerId: string;
   title: string;
   imageUrl: string; 
   linkType: number; 
@@ -33,12 +33,6 @@ const formOptions: VbenFormProps = {
       defaultValue: '',
       fieldName: 'title',
       label: '标题',
-    },
-    {
-      component: 'Input',
-      defaultValue: '',
-      fieldName: 'linkUrl',
-      label: '链接',
     },
     {
       component: 'Select',
@@ -100,7 +94,7 @@ const gridOptions: VxeTableGridOptions<RowType> = {
   proxyConfig: {
     ajax: {
       query: async ({ page }, formValues:any) => {
-        const res = await getBannerListApi({
+        const res = await getTopBannerListApi({
           pageNum: page.currentPage,
           pageSize: page.pageSize,
           ...formValues,
@@ -163,7 +157,7 @@ const handleDeleteBanner = async (row:any) => {
     okText:"确定",
     cancelText:"取消",
     async onOk() {
-      const res = await deleteBannerDeleteApi(row.bannerId);
+      const res = await deleteTopBannerDeleteApi(row.topBannerId);
       if(res.code == 200){
         message.success(res.message);
         handleTriggerSearch();
@@ -173,9 +167,9 @@ const handleDeleteBanner = async (row:any) => {
 };
 // 修改状态
 const handleChangeStatus = async (row:any) => {
-  console.log(row.status,row.bannerId)
-  const res = await putBannerStatusApi({
-    bannerId: row.bannerId,
+  console.log(row.status,row.TopBannerId)
+  const res = await putTopBannerStatusApi({
+    topBannerId: row.topBannerId,
     status: row.status,
   });
   if(res.code == 200){
@@ -189,7 +183,7 @@ const handleChangeStatus = async (row:any) => {
   <Page auto-content-height>
     <Grid>
       <template #toolbar-tools>
-        <Button type="primary" @click="handleCreateBanner">新建轮播图</Button>
+        <Button type="primary" @click="handleCreateBanner">新建顶部轮播图</Button>
       </template>
       <template #image-url="{ row }">
         <a-image :src="row?.imageUrl" :height="100" />

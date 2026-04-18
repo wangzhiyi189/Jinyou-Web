@@ -9,15 +9,18 @@ import dayjs from 'dayjs';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 
-import { getBannerListApi , deleteBannerDeleteApi , putBannerStatusApi } from '#/api/index';
+import { getLineListApi , deleteLineDeleteApi , putLineStatusApi  } from '#/api/index';
 
 import CreateDemo from './create-demo.vue';
+import LineDemo from './line-demo.vue';
+import { parseCity } from '@/utils/tools';
 type RowType = {
-  bannerId: string;
-  title: string;
-  imageUrl: string; 
-  linkType: number; 
-  linkUrl: string;  
+  stationId: Number;
+  stationName: string;
+  city: string; 
+  address: number; 
+  lng: number;  
+  lat: number;
   sort: number;
   status: number;
   remark: string;
@@ -31,14 +34,8 @@ const formOptions: VbenFormProps = {
     {
       component: 'Input',
       defaultValue: '',
-      fieldName: 'title',
-      label: '标题',
-    },
-    {
-      component: 'Input',
-      defaultValue: '',
-      fieldName: 'linkUrl',
-      label: '链接',
+      fieldName: 'lineName',
+      label: '线路名',
     },
     {
       component: 'Select',
@@ -74,13 +71,12 @@ const gridOptions: VxeTableGridOptions<RowType> = {
     labelField: 'name',
   },
   columns: [
-    { field: 'sort', title: '序号', width: 100 },
-    { field: 'title', title: '标题',  width: 150 },
-    { field: 'imageUrl', title: '轮播图' ,slots: { default: 'image-url' },width: 200,cellRender: { name: 'CellImage' },},
-    { field: 'linkType', title: '跳转链接',slots: { default: 'link-type' } },
+    { field: 'lineName', title: '线路名称',  width: 150 },
+    { field: 'startCity', title: '出发城市', width:240 ,slots: { default: 'startCity' }},
+    { field: 'endCity', title: '到达城市', width:240 ,slots: { default: 'endCity' }},
+    // { field: 'stationList', title: '途径站点' , width:200},
     { field: 'status', title: '状态',slots: { default: 'status' } },
     { field: 'createTime', title: '创建时间',width: 150 },
-    { field: 'updateTime', title: '修改时间' ,width: 150 },
     { field: 'remark', title: '备注' , width: 250 },
     {
       slots: { default: 'action' },
@@ -100,7 +96,7 @@ const gridOptions: VxeTableGridOptions<RowType> = {
   proxyConfig: {
     ajax: {
       query: async ({ page }, formValues:any) => {
-        const res = await getBannerListApi({
+        const res = await getLineListApi({
           pageNum: page.currentPage,
           pageSize: page.pageSize,
           ...formValues,
@@ -134,6 +130,11 @@ const [BaseModal, baseModalApi] = useVbenModal({
   // 连接抽离的组件
   connectedComponent: CreateDemo,
 });
+// 线路
+const [LineModal, lineModalApi] = useVbenModal({
+  // 链接抽离的组件
+  connectedComponent: LineDemo,
+});
 const handleCreateBanner = () => {
   // handleTriggerSearch()
   baseModalApi.open();
@@ -151,37 +152,46 @@ const handleTriggerSearch = async () => {
   message.success('已主动触发表格搜索');
 };
 // 编辑
-const handleEditBanner = (row:any) => {
+const handleEditLine = (row:any) => {
   baseModalApi.setData(row);
   baseModalApi.open();
 };
 // 删除
-const handleDeleteBanner = async (row:any) => {
+const handleDeleteLine = async (row:any) => {
   Modal.confirm({
     title: '操作提示',
     content: "确定要删除吗？",
     okText:"确定",
     cancelText:"取消",
     async onOk() {
-      const res = await deleteBannerDeleteApi(row.bannerId);
+      const res = await deleteLineDeleteApi(row.lineId);
       if(res.code == 200){
         message.success(res.message);
         handleTriggerSearch();
+      }else{
+        message.error(res.message);
       }
     },
   });
 };
 // 修改状态
 const handleChangeStatus = async (row:any) => {
-  console.log(row.status,row.bannerId)
-  const res = await putBannerStatusApi({
-    bannerId: row.bannerId,
+  const res = await putLineStatusApi({
+    lineId:row.lineId,
     status: row.status,
+
   });
   if(res.code == 200){
     message.success(res.message);
     handleTriggerSearch();
+  }else{
+    message.error(res.message);
   }
+};
+// 查看线路
+const handledetailLine = async(row:any) => {
+  lineModalApi.setData(row);
+  lineModalApi.open();
 };
 </script>
 
@@ -189,27 +199,26 @@ const handleChangeStatus = async (row:any) => {
   <Page auto-content-height>
     <Grid>
       <template #toolbar-tools>
-        <Button type="primary" @click="handleCreateBanner">新建轮播图</Button>
+        <Button type="primary" @click="handleCreateBanner">新建站点</Button>
       </template>
-      <template #image-url="{ row }">
-        <a-image :src="row?.imageUrl" :height="100" />
+      <template #startCity="{ row }">
+        {{ parseCity(row?.startCity) }}
       </template>
-      <template #link-type="{ row }">
-        <div class="link-type-box">
-          <span v-if="row?.linkType == 0">不跳转</span>
-          <span v-if="row?.linkType != 0">{{row?.linkUrl}}</span>
-        </div>
+      <template #endCity="{ row }">
+        {{ parseCity(row?.endCity) }}
       </template>
       <template #status="{ row }">
         <!-- eslint-disable-next-line vue/no-v-model-argument -->
         <a-switch v-model:checked="row.status" checked-children="启用" un-checked-children="禁用" :checkedValue="1" :unCheckedValue="0" default-checked @Change="handleChangeStatus(row)" />
       </template>
       <template #action={row}>
-        <a-button type="link" @click="handleEditBanner(row)">编辑</a-button>
-        <a-button type="link" @click="handleDeleteBanner(row)">删除</a-button>
+        <a-button type="link" @click="handleEditLine(row)">编辑</a-button>
+        <a-button type="link" @click="handledetailLine(row)">线路</a-button>
+        <a-button type="link" @click="handleDeleteLine(row)">删除</a-button>
       </template>
     </Grid>
     <BaseModal @refresh="handleTriggerSearch" />
+    <LineModal />
   </Page>
 </template>
 <style lang="less" scoped>

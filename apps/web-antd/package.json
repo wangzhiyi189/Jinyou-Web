@@ -46,6 +46,7 @@
     "pinia": "catalog:",
     "vue": "catalog:",
     "vue-img-cutter": "^3.0.7",
-    "vue-router": "catalog:"
+    "vue-router": "catalog:",
+    "@amap/amap-jsapi-loader": "^1.0.1"
   }
 }

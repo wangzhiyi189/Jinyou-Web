@@ -3,7 +3,7 @@ import { defineEmits , nextTick , defineProps, watch } from 'vue';
 import { message } from 'ant-design-vue';
 import { useVbenModal } from '@vben/common-ui';
 import { uploadFileApi  } from '#/api/core/user';
-import { postBannerAddApi, putBannerUpdateApi } from '#/api/core/home';
+import { postTopBannerAddApi, putTopBannerUpdateApi } from '#/api/core/home';
 import { reactive , ref } from 'vue';
 import { linkTypeData } from '#/utils/banner.ts'
 import Cropper from '#/components/cropper/index.vue';
@@ -14,11 +14,9 @@ const form = ref();
 const loading = ref(false)
 
 const formData = reactive({
-  bannerId:'',
+  topBannerId:'',
   title: '', // 轮播图标题
   imageUrl: '', // 轮播图图片
-  linkType: 0, // 跳转类型 0-不跳转 1-小程序页面 2-外部链接
-  linkUrl: '', // 跳转链接
   sort: 0,//排序
   status:1, // 状态 0-禁用 1-启用
   remark: '', // 备注
@@ -27,21 +25,19 @@ const [Modal, modalApi] = useVbenModal({
   onOpenChange(isOpen:Boolean) {
     if (isOpen) {
       var data = modalApi.getData();
-      if(data.bannerId){
+      if(data.topBannerId){
         status.value = 1
       }else{
         status.value = 0
       }
-      title.value = status.value == 0 ? '新增轮播图' : '修改轮播图'
+      title.value = status.value == 0 ? '新增顶部轮播图' : '修改轮播图'
       Object.assign(formData, data);
     }else{
       modalApi.setData({})
       Object.assign(formData, {
-        bannerId: '',
+        TopBannerId: '',
         title: '',
         imageUrl: '',
-        linkType: 0,
-        linkUrl: '',
         sort: 0,
         status: 1,
         remark: '',
@@ -60,9 +56,9 @@ const handleSubmit = async () => {
     loading.value = true
     var res;
     if(status.value == 0){
-      res = await postBannerAddApi(formData);
+      res = await postTopBannerAddApi(formData);
     }else{
-      res = await putBannerUpdateApi(formData);
+      res = await putTopBannerUpdateApi(formData);
     }
     if(res.code == 200){
       message.success(res.message);
@@ -143,19 +139,6 @@ const onComplete = async(row:any) =>{
               <div class="ant-upload-text">Upload</div>
             </div>
           </a-upload>
-        </a-formItem>
-        <a-formItem label="跳转类型" name="linkType">
-          <a-radio-group v-model:value="formData.linkType">
-            <a-radio :value="item.value" v-for="item in linkTypeData" :key="item.value">{{ item.label }}</a-radio>
-          </a-radio-group>
-        </a-formItem>
-        <a-formItem
-          label="跳转链接"
-          name="linkUrl"
-          :rules="[{ required: true, message: '请输入跳转链接' }]"
-          v-if="formData.linkType != 0"
-        >
-          <a-input v-model:value="formData.linkUrl" />
         </a-formItem>
         <a-formItem
           label="状态"

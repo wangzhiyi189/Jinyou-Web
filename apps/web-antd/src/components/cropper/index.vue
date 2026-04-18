@@ -152,7 +152,7 @@
     originalGraph: false, // originalGraph 等于 true 时裁剪原图，不支持图像旋转
     crossOrigin: true,
     fileType: 'png',
-    quality: 0.9,
+    quality: 1,
 
     // 水印默认值
     watermarkText: '',

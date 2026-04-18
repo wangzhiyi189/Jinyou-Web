@@ -634,6 +634,9 @@ importers:
 
   apps/web-antd:
     dependencies:
+      '@amap/amap-jsapi-loader':
+        specifier: ^1.0.1
+        version: 1.0.1
       '@vben/access':
         specifier: workspace:*
         version: link:../../packages/effects/access
@@ -2108,6 +2111,9 @@ packages:
   '@algolia/requester-node-http@5.49.2':
     resolution: {integrity: sha512-UuihBGHafG/ENsrcTGAn5rsOffrCIRuHMOsD85fZGLEY92ate+BMTUqxz60dv5zerh8ZumN4bRm8eW2z9L11jA==}
     engines: {node: '>= 14.0.0'}
+
+  '@amap/amap-jsapi-loader@1.0.1':
+    resolution: {integrity: sha512-nPyLKt7Ow/ThHLkSvn2etQlUzqxmTVgK7bIgwdBRTg2HK5668oN7xVxkaiRe3YZEzGzfV2XgH5Jmu2T73ljejw==}
 
   '@ant-design/colors@6.0.0':
     resolution: {integrity: sha512-qAZRvPzfdWHtfameEGP2Qvuf838NhergR35o+EuVyB5XvSA98xod5r4utvi4TJ3ywmevm290g9nsCG5MryrdWQ==}
@@ -11343,6 +11349,8 @@ snapshots:
   '@algolia/requester-node-http@5.49.2':
     dependencies:
       '@algolia/client-common': 5.49.2
+
+  '@amap/amap-jsapi-loader@1.0.1': {}
 
   '@ant-design/colors@6.0.0':
     dependencies:

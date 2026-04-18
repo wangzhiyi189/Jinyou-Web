@@ -1,15 +1,22 @@
 import { defineConfig } from '@vben/vite-config';
-// 引入自动导入插件
+import path from 'path'; // 👈 加上这个
+
 export default defineConfig(async () => {
   return {
     application: {},
     vite: {
+      // 👇 加上 resolve.alias 配置
+      resolve: {
+        alias: {
+          '#': path.resolve(__dirname, './src'),
+          '@': path.resolve(__dirname, './src'),
+        },
+      },
       server: {
         proxy: {
           '/api': {
             changeOrigin: true,
             rewrite: (path) => path.replace(/^\/api/, ''),
-            // mock代理目标地址
             target: 'http://localhost:5320/api',
             ws: true,
           },

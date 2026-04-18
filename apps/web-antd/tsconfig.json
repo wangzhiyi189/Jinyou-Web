@@ -3,8 +3,12 @@
   "extends": "@vben/tsconfig/web-app.json",
   "compilerOptions": {
     "paths": {
-      "#/*": ["./src/*"]
-    }
+      "#/*": ["./src/*"],
+    },
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "moduleResolution": "Bundler"
   },
   "references": [{ "path": "./tsconfig.node.json" }],
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"]

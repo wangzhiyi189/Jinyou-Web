@@ -13,6 +13,16 @@ const routes: RouteRecordRaw[] = [
     path: '/homeManage',
     children: [
       {
+        name: 'topBanner',
+        path: '/topBanner',
+        component: () => import('#/views/homeManage/topBanner/index.vue'),
+        meta: {
+          affixTab: true,
+          icon: 'lucide:area-chart',
+          title: '顶部轮播图管理',
+        },
+      },
+      {
         name: 'banner',
         path: '/Banner',
         component: () => import('#/views/homeManage/banner/index.vue'),
@@ -22,8 +32,18 @@ const routes: RouteRecordRaw[] = [
           title: '轮播图管理',
         },
       },
+      {
+        name: 'recommend',
+        path: '/Recommend',
+        component: () => import('#/views/homeManage/recommend/index.vue'),
+        meta: {
+          affixTab: true,
+          icon: 'lucide:area-chart',
+          title: '推荐管理',
+        },
+      },
     ]
-  }
+  },
 ]
 
 export default routes;

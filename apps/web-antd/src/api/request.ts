@@ -1,7 +1,7 @@
 /**
  * 该文件可自行根据业务逻辑进行调整
  */
-import type { RequestClientOptions } from '@vben/request';
+import type { RequestClientOptions, AxiosRequestConfig } from '@vben/request';
 
 import { useAppConfig } from '@vben/hooks';
 import { preferences } from '@vben/preferences';
@@ -18,9 +18,35 @@ import { message } from 'ant-design-vue';
 import { useAuthStore } from '#/store';
 
 import { refreshTokenApi } from './core';
+import axios from 'axios';
 
 // const { apiURL } = useAppConfig(import.meta.env, import.meta.env.PROD);
-const apiURL = 'http://localhost:8081/';
+const apiURL = 'http://localhost:8081/admin';
+
+// ===================== 新增：重复请求拦截 =====================
+const pendingRequests = new Map<string, AbortController>();
+
+/**
+ * 生成请求唯一标识
+ */
+function getRequestKey(config: AxiosRequestConfig): string {
+  const { method, url, params, data } = config;
+  return [method, url, JSON.stringify(params), JSON.stringify(data)].join('&');
+}
+
+/**
+ * 移除重复请求
+ */
+function removePendingRequest(config: AxiosRequestConfig) {
+  const key = getRequestKey(config);
+  if (pendingRequests.has(key)) {
+    const controller = pendingRequests.get(key);
+    controller?.abort(); // 取消上一次请求
+    pendingRequests.delete(key);
+  }
+}
+
+// ============================================================
 
 function createRequestClient(baseURL: string, options?: RequestClientOptions) {
   const client = new RequestClient({
@@ -61,16 +87,41 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
     return token ? `Bearer ${token}` : null;
   }
 
-  // 请求头处理
+  // ===================== 新增：请求拦截器处理重复请求 =====================
   client.addRequestInterceptor({
     fulfilled: async (config) => {
       const accessStore = useAccessStore();
+
+      // 取消重复请求
+      removePendingRequest(config);
+
+      // 添加新的请求控制器
+      const controller = new AbortController();
+      config.signal = controller.signal;
+      pendingRequests.set(getRequestKey(config), controller);
 
       config.headers.Authorization = formatToken(accessStore.accessToken);
       config.headers['Accept-Language'] = preferences.app.locale;
       return config;
     },
   });
+
+  // 响应清理
+  client.addResponseInterceptor({
+    fulfilled: (response) => {
+      removePendingRequest(response.config);
+      return response;
+    },
+    rejected: (error) => {
+      console.log(error)
+      if (!axios.isCancel(error)) {
+        // 只有非主动取消的错误才清理
+        removePendingRequest(error.config || {});
+      }
+      return Promise.reject(error);
+    },
+  });
+  // ====================================================================
 
   // 处理返回的响应数据格式
   client.addResponseInterceptor(
@@ -90,16 +141,13 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
       enableRefreshToken: preferences.app.enableRefreshToken,
       formatToken,
     }),
+    
   );
-
   // 通用的错误处理,如果没有进入上面的错误处理逻辑，就会进入这里
   client.addResponseInterceptor(
     errorMessageResponseInterceptor((msg: string, error) => {
-      // 这里可以根据业务进行定制,你可以拿到 error 内的信息进行定制化处理，根据不同的 code 做不同的提示，而不是直接使用 message.error 提示 msg
-      // 当前mock接口返回的错误字段是 error 或者 message
       const responseData = error?.response?.data ?? {};
       const errorMessage = responseData?.error ?? responseData?.message ?? '';
-      // 如果没有错误信息，则会根据状态码进行提示
       message.error(errorMessage || msg);
     }),
   );
@@ -109,9 +157,9 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
 
 export const requestClient = createRequestClient(apiURL, {
   responseReturn: 'body',
-  withCredentials: true, // 允许跨域带cookie
+  withCredentials: true,
   headers: {
-    'Content-Type': 'application/json', // 确保传递JSON格式body
+    'Content-Type': 'application/json',
   },
 });
 
