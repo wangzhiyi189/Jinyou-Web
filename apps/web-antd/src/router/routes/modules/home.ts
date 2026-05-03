@@ -17,7 +17,7 @@ const routes: RouteRecordRaw[] = [
         path: '/topBanner',
         component: () => import('#/views/homeManage/topBanner/index.vue'),
         meta: {
-          affixTab: true,
+          affixTab: false,
           icon: 'lucide:area-chart',
           title: '顶部轮播图管理',
         },
@@ -27,7 +27,7 @@ const routes: RouteRecordRaw[] = [
         path: '/Banner',
         component: () => import('#/views/homeManage/banner/index.vue'),
         meta: {
-          affixTab: true,
+          affixTab: false,
           icon: 'lucide:area-chart',
           title: '轮播图管理',
         },
@@ -37,7 +37,7 @@ const routes: RouteRecordRaw[] = [
         path: '/Recommend',
         component: () => import('#/views/homeManage/recommend/index.vue'),
         meta: {
-          affixTab: true,
+          affixTab: false,
           icon: 'lucide:area-chart',
           title: '推荐管理',
         },

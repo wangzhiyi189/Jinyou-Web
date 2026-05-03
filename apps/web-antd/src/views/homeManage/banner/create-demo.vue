@@ -65,7 +65,7 @@ const handleSubmit = async () => {
       res = await putBannerUpdateApi(formData);
     }
     if(res.code == 200){
-      message.success(res.message);
+      message.success(res.msg);
       emit('refresh');
       handleClose()
     }

@@ -31,9 +31,13 @@ const formData = reactive({
   seatRemaining:'', // 剩余座位数
   sort: 0,//排序
   status:1, // 状态 0-禁用 1-启用
-  isRecommend:0, // 是否推荐 0-否 1-是
   remark: '', // 备注
 });
+// 限制时间
+const disabledDate = (current: any) => {
+  // Can not select days before today and today
+  return current && current.isBefore(dayjs(), 'day');
+};
 const [Modal, modalApi] = useVbenModal({
   onOpenChange(isOpen:Boolean) {
     if (isOpen) {
@@ -68,7 +72,6 @@ const [Modal, modalApi] = useVbenModal({
         seatRemaining:'', // 剩余座位数
         sort: 0,//排序
         status:1, // 状态 0-禁用 1-启用
-        isRecommend:0, // 是否推荐 0-否 1-是
         remark: '', // 备注
       });
     }
@@ -104,7 +107,7 @@ const handleSubmit = async () => {
       res = await putScheduleUpdateApi(formData);
     }
     if(res.code == 200){
-      message.success(res.message);
+      message.success(res.msg);
       emit('refresh');
       // handleClose()
     }
@@ -168,7 +171,7 @@ const handlePushLine = () => {
           </a-select>
         </a-formItem>
         <a-formItem label="发车时间-到达时间" name="departTime" :rules="[{ required: true, message: '请选择发车时间-到达时间', trigger: 'change'}]">
-          <a-range-picker show-time format="YYYY-MM-DD HH:mm" @change="handleTime" :default-value="[formData.departTime ? dayjs(formData.departTime) : '', formData.arriveTime ? dayjs(formData.arriveTime) :'']" />
+          <a-range-picker show-time format="YYYY-MM-DD HH:mm" @change="handleTime" :default-value="[formData.departTime ? dayjs(formData.departTime) : '', formData.arriveTime ? dayjs(formData.arriveTime) :'']" :disabled-date="disabledDate"/>
         </a-formItem>
         <a-formItem
           label="运行时长"
@@ -218,13 +221,6 @@ const handlePushLine = () => {
         >
           <!-- 0-禁用 1-启用 -->
           <a-switch v-model:checked="formData.status" checked-children="启用" un-checked-children="禁用" :checkedValue="1" :unCheckedValue="0" default-checked />
-        </a-formItem>
-        <a-formItem
-          label="是否推荐"
-          name="isRecommend"
-        >
-          <!-- 0-禁用 1-启用 -->
-          <a-switch v-model:checked="formData.isRecommend" checked-children="推荐" un-checked-children="不推荐" :checkedValue="1" :unCheckedValue="0" default-checked />
         </a-formItem>
         <a-formItem
           label="备注"

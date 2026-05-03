@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import { defineEmits, nextTick, onMounted, onUnmounted } from 'vue';
+import { defineEmits, onMounted } from 'vue';
 import { message } from 'ant-design-vue';
 import { useVbenModal } from '@vben/common-ui';
-import { getOptionListApi , postLineAddApi, postLineUpdateApi } from '#/api/index.ts';
+import { getOptionListApi , postLineAddApi, postLineUpdateApi } from '#/api';
 import { reactive, ref } from 'vue';
 import cityOption from '#/utils/city.json'
 import { router } from '#/router';
@@ -19,7 +19,9 @@ const formData = reactive({
   stationList : [],//站点顺序数组，逗号分隔
   startCity : [],//出发城市
   endCity : [],//到达城市
+  price:'', // 价格
   status : 1,//状态 0-禁用 1-启用
+  isPopular:0, // 是否热门 1-是 0-否
   createTime : '',//创建时间
   remark : '',//备注
 });
@@ -46,9 +48,12 @@ const [Modal, modalApi] = useVbenModal({
         stationList : [],//站点顺序数组，逗号分隔
         startCity : [],//出发城市
         endCity : [],//到达城市
+        price:'',
         status : 1,//状态 1-启用 2-禁用
+        isPopular:0,
         createTime : '',//创建时间
         remark : '',//备注
+        
       });
     }
   },
@@ -59,8 +64,8 @@ onMounted(() => {
   handleSelectOptions()
 });
 const handleSelectOptions = async() => {
-  const {data,code,message} = await getOptionListApi();
-  console.log(data,code,message)
+  const {data,code,msg} = await getOptionListApi();
+  console.log(data,code,msg)
   stationOptions.value = data;
 }
 const emit = defineEmits<{
@@ -89,7 +94,7 @@ const handleSubmit = async () => {
       });
     }
     if (res.code === 200) {
-      message.success(res.message);
+      message.success(res.msg);
       emit('refresh');
       handleClose();
     }
@@ -104,7 +109,7 @@ const handleClose = () => {
   modalApi.close();
   loading.value = false;
 };
-const filterOption = (input, option) => {
+const filterOption = (input : any, option : any) => {
   // input：用户输入的搜索词
   // option：当前选项对象
   return option.stationName.toLowerCase().includes(input.toLowerCase())
@@ -138,14 +143,14 @@ const handlePushStation = () =>{
           name="startCity"
           :rules="[{ required: true, message: '请先择出发城市' }]"
         >
-          <a-cascader v-model:value="formData.startCity" :fieldNames="fieldNamesOptions" @change="(value) => {formData.startCity = value}" :changeOnSelect="true" :options="cityOption" placeholder="选择出发城市" />
+          <a-cascader v-model:value="formData.startCity" :fieldNames="fieldNamesOptions" @change="(value : any) => {formData.startCity = value}" :changeOnSelect="true" :options="cityOption" placeholder="选择出发城市" />
         </a-formItem>
         <a-formItem
           label="到达城市"
           name="endCity"
           :rules="[{ required: true, message: '请先择到达城市' }]"
         >
-          <a-cascader v-model:value="formData.endCity" :fieldNames="fieldNamesOptions" @change="(value) => {formData.endCity = value}" :changeOnSelect="true" :options="cityOption" placeholder="选择到达城市" />
+          <a-cascader v-model:value="formData.endCity" :fieldNames="fieldNamesOptions" @change="(value : any) => {formData.endCity = value}" :changeOnSelect="true" :options="cityOption" placeholder="选择到达城市" />
         </a-formItem>
         <a-formItem
           label="途径站"
@@ -169,11 +174,25 @@ const handlePushStation = () =>{
           </a-select>
         </a-formItem>
         <a-formItem
+          label="票价"
+          name="price"
+          :rules="[{ required: true, message: '请输入票价' }]"
+        >
+          <a-input type="number" :min="0.1" v-model:value="formData.price" prefix="￥" suffix="RMB起"  />
+        </a-formItem>
+        <a-formItem
           label="状态"
           name="status"
         >
           <!-- 0-禁用 1-启用 -->
           <a-switch v-model:checked="formData.status" checked-children="启用" un-checked-children="禁用" :checkedValue="1" :unCheckedValue="0" default-checked />
+        </a-formItem>
+        <a-formItem
+          label="是否热门"
+          name="status"
+        >
+          <!-- 0-不热门 1-热门 -->
+          <a-switch v-model:checked="formData.isPopular" checked-children="是" un-checked-children="否" :checkedValue="1" :unCheckedValue="0" default-checked />
         </a-formItem>
         <a-formItem
           label="备注"

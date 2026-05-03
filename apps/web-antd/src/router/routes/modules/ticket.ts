@@ -11,13 +11,33 @@ const routes: RouteRecordRaw[] = [
     path: '/ticketManage',
     children: [
       {
+        name: 'scheduleTemplate',
+        path: '/scheduleTemplate',
+        component: () => import('#/views/ticketManage/scheduleTemplate/index.vue'),
+        meta: {
+          affixTab: false,
+          icon: 'lucide:area-chart',
+          title: '车次模板管理',
+        },
+      },
+      {
         name: 'schedule',
         path: '/schedule',
         component: () => import('#/views/ticketManage/schedule/index.vue'),
         meta: {
-          affixTab: true,
+          affixTab: false,
           icon: 'lucide:area-chart',
           title: '车次管理',
+        },
+      },
+      {
+        name: 'order',
+        path: '/order',
+        component: () => import('#/views/ticketManage/order/index.vue'),
+        meta: {
+          affixTab: false,
+          icon: 'lucide:area-chart',
+          title: '订单管理',
         },
       },
     ]

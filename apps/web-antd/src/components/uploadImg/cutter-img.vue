@@ -137,8 +137,8 @@ import { defineOptions , defineEmits , ref , computed , defineExpose , definePro
     lockScroll: true,
 
     // 尺寸相关默认值
-    boxWidth: 480,
-    boxHeight: 360,
+    boxWidth: 580,
+    boxHeight: 460,
     cutWidth: 360,
     cutHeight: 240,
     sizeChange: true,
@@ -152,8 +152,8 @@ import { defineOptions , defineEmits , ref , computed , defineExpose , definePro
     originalGraph: false, // originalGraph 等于 true 时裁剪原图，不支持图像旋转
     crossOrigin: true,
     fileType: 'png',
-    quality: 0.9,
-
+    quality: 1,
+    originalSize:true,
     // 水印默认值
     watermarkText: '',
     watermarkFontSize: 20,
@@ -308,13 +308,13 @@ import { defineOptions , defineEmits , ref , computed , defineExpose , definePro
       margin-top: 16px;
     }
 
-    :deep(.dockBtn) {
+    .dockBtn {
       height: 26px;
       padding: 0 10px;
       font-size: 12px;
       line-height: 26px;
       background-color: rgb(var(--primary-6));
-      color: #fff;
+      color:#333!important;
     }
 
     :deep(.dockBtnScrollBar) {

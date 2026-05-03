@@ -5,9 +5,10 @@ import type { VxeTableGridOptions } from '#/adapter/vxe-table';
 import { Page , useVbenModal } from '@vben/common-ui';
 
 import { Button,message,Modal } from 'ant-design-vue';
+
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 
-import { getScheduleListApi , deleteScheduleDeleteApi , putScheduleStatusApi  , putScheduleIsRecommendApi , getScheduleVoListApi } from '#/api/index';
+import { getScheduleTemplateListApi , deleteScheduleDeleteApi , putScheduleStatusApi  , putScheduleIsRecommendApi , getScheduleVoListApi } from '#/api/index';
 
 import CreateDemo from './create-demo.vue';
 import LineDemo from './line-demo.vue';
@@ -26,6 +27,7 @@ type RowType = {
   seatRemaining:string, // 剩余座位数
   sort: number,//排序
   status:number, // 状态 0-禁用 1-启用
+  isRecommend:number, // 是否推荐 0-否 1-是
   remark: string, // 备注
   startCity:string,
   endCity:string
@@ -112,6 +114,7 @@ const gridOptions: VxeTableGridOptions<RowType> = {
     { field: 'seatTotal', title: '总座位数',width: 150 },
     { field: 'seatRemaining', title: '剩余座位数',width: 150 },
     { field: 'status', title: '状态',slots: { default: 'status' } ,width: 150},
+    { field: 'isRecommend', title: '是否推荐',slots: { default: 'isRecommend' },width: 150 },
     { field: 'createTime', title: '创建时间',width: 150 },
     { field: 'updateTime', title: '修改时间' ,width: 150 },
     { field: 'remark', title: '备注' , width: 250 },
@@ -133,7 +136,7 @@ const gridOptions: VxeTableGridOptions<RowType> = {
   proxyConfig: {
     ajax: {
       query: async ({ page }, formValues:any) => {
-        const res = await getScheduleVoListApi({
+        const res = await getScheduleTemplateListApi({
           pageNum: page.currentPage,
           pageSize: page.pageSize,
           ...formValues,
@@ -219,6 +222,18 @@ const handleChangeStatus = async (row:any) => {
     // handleTriggerSearch();
   }
 };
+// 是否推荐
+const handleChangeIsRecommend = async(row:any) => {
+    console.log(row.isRecommend,row.scheduleId)
+  const res = await putScheduleIsRecommendApi({
+    scheduleId: row.scheduleId,
+    isRecommend: row.isRecommend,
+  });
+  if(res.code == 200){
+    message.success(res.msg);
+    handleTriggerSearch();
+  }
+}
 // 线路详情
 const handleLineDetail = (row:any) => {
   console.log(row.stationList)
@@ -231,16 +246,16 @@ const handleLineDetail = (row:any) => {
   <Page auto-content-height>
     <Grid>
       <template #toolbar-tools>
-        <Button type="primary" @click="handleCreateBanner">新建车次</Button>
+        <Button type="primary" @click="handleCreateBanner">新建车次模板</Button>
       </template>
       <template #stationList="{ row }">
-        <a-button type="link" @click="handleLineDetail(row)">查看</a-button>
+        <!-- <a-button type="link" @click="handleLineDetail(row)">查看</a-button> -->
       </template>
       <template #startCity="{ row }">
-        {{ parseCity(row?.startCity) }}
+        <!-- {{ parseCity(row?.startCity) }} -->
       </template>
       <template #endCity="{ row }">
-        {{ parseCity(row?.endCity) }}
+        <!-- {{ parseCity(row?.endCity) }} -->
       </template>
       <template #departTime="{ row }">
         {{ row.departTime }}
@@ -260,6 +275,10 @@ const handleLineDetail = (row:any) => {
       <template #status="{ row }">
         <!-- eslint-disable-next-line vue/no-v-model-argument -->
         <a-switch v-model:checked="row.status" checked-children="启用" un-checked-children="禁用" :checkedValue="1" :unCheckedValue="0" default-checked @Change="handleChangeStatus(row)" />
+      </template>
+      <template #isRecommend="{ row }">
+        <!-- eslint-disable-next-line vue/no-v-model-argument -->
+        <a-switch v-model:checked="row.isRecommend" checked-children="推荐" un-checked-children="不推荐" :checkedValue="1" :unCheckedValue="0" default-checked @Change="handleChangeIsRecommend(row)" />
       </template>
       <template #action={row}>
         <a-button type="link" @click="handleEditBanner(row)">编辑</a-button>

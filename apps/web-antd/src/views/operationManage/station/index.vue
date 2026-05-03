@@ -160,10 +160,10 @@ const handleDeleteBanner = async (row:any) => {
     async onOk() {
       const res = await deleteStationDeleteApi(row.stationId);
       if(res.code == 200){
-        message.success(res.message);
+        message.success(res.msg);
         handleTriggerSearch();
       }else{
-        message.error(res.message);
+        message.error(res.msg);
       }
     },
   });
@@ -175,10 +175,10 @@ const handleChangeStatus = async (row:any) => {
     status: row.status,
   });
   if(res.code == 200){
-    message.success(res.message);
+    message.success(res.msg);
     handleTriggerSearch();
   }else{
-    message.error(res.message);
+    message.error(res.msg);
 
   }
 };

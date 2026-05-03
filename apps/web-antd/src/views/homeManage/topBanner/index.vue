@@ -159,7 +159,7 @@ const handleDeleteBanner = async (row:any) => {
     async onOk() {
       const res = await deleteTopBannerDeleteApi(row.topBannerId);
       if(res.code == 200){
-        message.success(res.message);
+        message.success(res.msg);
         handleTriggerSearch();
       }
     },
@@ -173,7 +173,7 @@ const handleChangeStatus = async (row:any) => {
     status: row.status,
   });
   if(res.code == 200){
-    message.success(res.message);
+    message.success(res.msg);
     handleTriggerSearch();
   }
 };

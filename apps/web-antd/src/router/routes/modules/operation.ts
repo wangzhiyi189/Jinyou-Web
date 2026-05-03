@@ -16,7 +16,7 @@ const routes: RouteRecordRaw[] = [
         path: '/station',
         component: () => import('#/views/operationManage/station/index.vue'),
         meta: {
-          affixTab: true,
+          affixTab: false,
           icon: 'lucide:area-chart',
           title: '站点管理',
         },
@@ -26,7 +26,7 @@ const routes: RouteRecordRaw[] = [
         path: '/line',
         component: () => import('#/views/operationManage/line/index.vue'),
         meta: {
-          affixTab: true,
+          affixTab: false,
           icon: 'lucide:area-chart',
           title: '线路管理',
         },

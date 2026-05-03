@@ -5,7 +5,6 @@ import type { VxeTableGridOptions } from '#/adapter/vxe-table';
 import { Page , useVbenModal } from '@vben/common-ui';
 
 import { Button,message,Modal } from 'ant-design-vue';
-import dayjs from 'dayjs';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 
@@ -16,14 +15,14 @@ import LineDemo from './line-demo.vue';
 import { parseCity } from '@/utils/tools';
 type RowType = {
   stationId: Number;
-  stationName: string;
-  city: string; 
-  address: number; 
-  lng: number;  
-  lat: number;
-  sort: number;
+  lineName: string;
+  startCity: string; 
+  endCity: string; 
+  stationList: string;
   status: number;
+  isPopular: number;
   remark: string;
+  price:number;
 };
 
 const formOptions: VbenFormProps = {
@@ -71,13 +70,14 @@ const gridOptions: VxeTableGridOptions<RowType> = {
     labelField: 'name',
   },
   columns: [
-    { field: 'lineName', title: '线路名称',  width: 150 },
+    { field: 'lineName', title: '线路名称',  width: 200 },
     { field: 'startCity', title: '出发城市', width:240 ,slots: { default: 'startCity' }},
     { field: 'endCity', title: '到达城市', width:240 ,slots: { default: 'endCity' }},
-    // { field: 'stationList', title: '途径站点' , width:200},
-    { field: 'status', title: '状态',slots: { default: 'status' } },
-    { field: 'createTime', title: '创建时间',width: 150 },
-    { field: 'remark', title: '备注' , width: 250 },
+    { field: 'price', title: '票价',slots: { default: 'price' } , width:100},
+    { field: 'status', title: '状态',slots: { default: 'status' },width: 150 },
+    { field: 'stisPopularatus', title: '是否热门',slots: { default: 'isPopular' },width: 150 },
+    { field: 'remark', title: '备注' , minWidth: 250 },
+     { field: 'createTime', title: '创建时间',width: 150 },
     {
       slots: { default: 'action' },
       field: 'action',
@@ -166,10 +166,10 @@ const handleDeleteLine = async (row:any) => {
     async onOk() {
       const res = await deleteLineDeleteApi(row.lineId);
       if(res.code == 200){
-        message.success(res.message);
+        message.success(res.msg);
         handleTriggerSearch();
       }else{
-        message.error(res.message);
+        message.error(res.msg);
       }
     },
   });
@@ -179,13 +179,25 @@ const handleChangeStatus = async (row:any) => {
   const res = await putLineStatusApi({
     lineId:row.lineId,
     status: row.status,
-
+    isPopular: row.isPopular,
   });
   if(res.code == 200){
-    message.success(res.message);
-    handleTriggerSearch();
+    message.success(res.msg);
   }else{
-    message.error(res.message);
+    message.error(res.msg);
+  }
+};
+// 是否热门
+const handleChangePopular = async (row:any) => {
+  const res = await putLineStatusApi({
+    lineId:row.lineId,
+    status: row.status,
+    isPopular: row.isPopular,
+  });
+  if(res.code == 200){
+    message.success(res.msg);
+  }else{
+    message.error(res.msg);
   }
 };
 // 查看线路
@@ -199,7 +211,7 @@ const handledetailLine = async(row:any) => {
   <Page auto-content-height>
     <Grid>
       <template #toolbar-tools>
-        <Button type="primary" @click="handleCreateBanner">新建站点</Button>
+        <Button type="primary" @click="handleCreateBanner">新建线路</Button>
       </template>
       <template #startCity="{ row }">
         {{ parseCity(row?.startCity) }}
@@ -207,9 +219,15 @@ const handledetailLine = async(row:any) => {
       <template #endCity="{ row }">
         {{ parseCity(row?.endCity) }}
       </template>
+      <template #price="{ row }">
+        ¥{{ row?.price }}起
+      </template>
       <template #status="{ row }">
-        <!-- eslint-disable-next-line vue/no-v-model-argument -->
         <a-switch v-model:checked="row.status" checked-children="启用" un-checked-children="禁用" :checkedValue="1" :unCheckedValue="0" default-checked @Change="handleChangeStatus(row)" />
+      </template>
+      
+      <template #isPopular="{ row }">
+        <a-switch v-model:checked="row.isPopular" checked-children="是" un-checked-children="否" :checkedValue="1" :unCheckedValue="0" default-checked @Change="handleChangePopular(row)" />
       </template>
       <template #action={row}>
         <a-button type="link" @click="handleEditLine(row)">编辑</a-button>
